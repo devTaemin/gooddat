@@ -5,8 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
-usr = "exopas@naver.com"
-pwd = "1fkaqhfmrlsl1"
+usr = "Type facebook ID"
+pwd = "Type facebook PW"
 
 path = '/Users/cross/Downloads/chromedriver_win32/chromedriver'
 driver = webdriver.Chrome(path)
