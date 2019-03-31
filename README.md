@@ -1,2 +1,2 @@
 # gooddat
-Making Info-graphic based on YouTube &amp; Facebook comments
+Comment Analyzer used in online clothing shopping sites for customers
