@@ -17,7 +17,7 @@ def main():
     crawlResult = crawler.driver(urlLink)
 
     # Algorithm에 결과 넘기기
-    categResult = categorize.tokenize(crawlResult)
+    categorize.tokenize(crawlResult)
 
     # 최종 결과값 DB에 저장하기
     dataUpload(categResult)
