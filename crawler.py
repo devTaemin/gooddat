@@ -11,6 +11,9 @@ def flyday(url):
     '''
     우선 주소 specific하게 정의된 함수를 사용하였다.
     또한 해당 홈페이지 내에 iframe tag에 있는 html에 접근하였다는 가정하에 코드를 짰다.
+    더 붙여야하는 코드:
+        -url 받으면 댓글 몇 개 있는지 확인하고 몇 번 돌릴지 확인하는 함수.
+        -이에 따라 page=의 인덱스 찾아 url내용 바꿔주는 코드
     '''
     textfile=open('comment.txt','w')
     for i in range(1,249):
