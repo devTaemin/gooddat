@@ -5,7 +5,6 @@
 #Algorithm에 문장 넘기기
 #결과값 DB에 저장하기
 
-from db import * 
 import crawler 
 import categorize
 
@@ -18,9 +17,7 @@ def main():
 
     # Algorithm에 결과 넘기기
     categorize.tokenize(crawlResult)
-
-    # 최종 결과값 DB에 저장하기
-    dataUpload(categResult)
+    
 
 if __name__ == '__main__':
     main()
