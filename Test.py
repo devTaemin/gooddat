@@ -10,6 +10,10 @@ import json
 import os
 import nltk
 
+import matplotlib.pyplot as plt
+from matplotlib import font_manager, rc
+
+from pprint import pprint
 from tensorflow.keras import models
 from tensorflow.keras import layers
 from tensorflow.keras import optimizers
@@ -30,15 +34,29 @@ def tokenize(doc):
 def term_frequency(doc):
     return [doc.count(word) for word in selected_words]
 
-def predict_pos_neg(review):
+def predict_pos_neg(review, token_array_pro, token_array_con):
+    temp_pro = []
+    temp_con = []
     token = tokenize(review)
     tf = term_frequency(token)
     data = np.expand_dims(np.asarray(tf).astype('float32'), axis=0)
     score = float(model.predict(data))
     if(score > 0.5):
-        print("[{}]는 {:.2f}% 확률로 긍정 리뷰이지 않을까 추측해봅니다.^^\n".format(review, score * 100))
+        temp = okt.pos(review)
+        temp_pro.append(temp)
+        for d in temp_pro:
+            for t in d:
+                if (t[1] == 'Noun' or t[1] == 'Adjective' or t[1] == 'Verb'):
+                    token_array_pro.append(t)
+        #print("[{}]는 {:.2f}% 확률로 긍정 리뷰\n".format(review, score * 100))
     else:
-        print("[{}]는 {:.2f}% 확률로 부정 리뷰이지 않을까 추측해봅니다.^^;\n".format(review, (1 - score) * 100))
+        temp = okt.pos(review)
+        temp_con.append(temp)
+        for d in temp_con:
+            for t in d:
+                if (t[1] == 'Noun' or t[1] == 'Adjective' or t[1] == 'Verb'):
+                    token_array_con.append(t)
+        #print("[{}]는 {:.2f}% 확률로 부정 리뷰\n".format(review, (1 - score) * 100))
 
 train_data = read_data('ratings_train.txt')
 test_data = read_data('ratings_test.txt')
@@ -89,8 +107,63 @@ model.compile(optimizer=optimizers.RMSprop(lr=0.001),
 model.fit(x_train, y_train, epochs=10, batch_size=512)
 results = model.evaluate(x_test, y_test)
 
-predict_pos_neg("올해 최고의 영화! 세 번 넘게 봐도 질리지가 않네요.")
-predict_pos_neg("배경 음악이 영화의 분위기랑 너무 안 맞았습니다. 몰입에 방해가 됩니다.")
-predict_pos_neg("주연 배우가 신인인데 연기를 진짜 잘 하네요. 몰입감 ㅎㄷㄷ")
-predict_pos_neg("믿고 보는 감독이지만 이번에는 아니네요")
-predict_pos_neg("주연배우 때문에 봤어요")
+token_array_pro = []
+token_array_con = []
+
+current_dir =  os.path.abspath(os.path.dirname(__file__))
+parent_dir = os.path.abspath(current_dir + "/../")
+current_dir = os.path.abspath(parent_dir + "gooddat/txt_files/")
+with open(current_dir + 'ratings_test.txt', 'r', encoding='UTF8') as f:
+#with open(current_dir + 'Flyday_comment_list.txt', 'r', encoding='UTF8') as f:
+    for line in f:
+        predict_pos_neg(line, token_array_pro, token_array_con)
+        
+text_pro = nltk.Text(token_array_pro, name = 'NMSC')
+print (len(text_pro.tokens))
+print(len(set(text_pro.tokens)))
+pprint(text_pro.vocab().most_common(10))
+
+text_con = nltk.Text(token_array_con, name = 'NMSC')
+print (len(text_con.tokens))
+print(len(set(text_con.tokens)))
+
+pprint(text_con.vocab().most_common(10))
+
+#그래프 그리기
+font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
+rc('font', family=font_name)
+y_pro = []
+x_pro = []
+y_con = []
+x_con = []
+
+
+for i in range(0, 10):
+    y_pro.append(text_pro.vocab().most_common(10)[i][0][0])
+    x_pro.append(text_pro.vocab().most_common(10)[i][1])
+    
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111)
+ypos = np.arange(10)
+rects = plt.barh(ypos, x_pro, align='center', height=0.5)
+plt.yticks(ypos, y_pro)
+plt.xlabel('긍정적인 결과')
+plt.show()
+
+for i in range(0, 10):
+    y_con.append(text_con.vocab().most_common(10)[i][0][0])
+    x_con.append(text_con.vocab().most_common(10)[i][1])
+    
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111)
+ypos = np.arange(10)
+rects = plt.barh(ypos, x_con, align='center', height=0.5)
+plt.yticks(ypos, y_con)
+plt.xlabel('부정적인 결과')
+plt.show()
+
+#predict_pos_neg("올해 최고의 영화! 세 번 넘게 봐도 질리지가 않네요.")
+#predict_pos_neg("배경 음악이 영화의 분위기랑 너무 안 맞았습니다. 몰입에 방해가 됩니다.")
+#predict_pos_neg("주연 배우가 신인인데 연기를 진짜 잘 하네요. 몰입감 ㅎㄷㄷ")
+#predict_pos_neg("믿고 보는 감독이지만 이번에는 아니네요")
+#predict_pos_neg("주연배우 때문에 봤어요")

@@ -86,7 +86,7 @@ def tokenize():
     pprint(text.vocab().most_common(10))
     
     
-    
+    '''
     # 데이터 전처리
     selected_words = [f[0] for f in text.vocab().most_common(10000)]
     
@@ -102,7 +102,7 @@ def tokenize():
     y_test = np.asarray(test_y).astype('float32')
     
     '''
-    
+    '''
     # 모델 정의 및 학습하기
     model = models.Sequential()
     model.add(layers.Dense(64, activation='relu', input_shape=(10000,)))

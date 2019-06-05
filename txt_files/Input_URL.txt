@@ -1,0 +1,7 @@
+
+Input URL 
+
+
+#testcase = "http://www.imvely.com/product/detail.html?product_no=16550&cate_no=1&display_group=32"
+#testcase = "http://www.flyday.co.kr/shop/shopdetail.html?branduid=1116605&xcode=018&mcode=003&scode=&special=3&GfDT=Z293UA%3D%3D"
+#testcase = "http://www.naning9.com/shop/view.php?index_no=48803&main_idx=66"
