@@ -1,0 +1,38 @@
+body {
+  background-image: url("images/background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+body {
+  color: rgb(255, 255, 255);
+  text-align: center;
+}
+
+.title {
+  font-size: 40px;
+}
+
+input {
+  width: 500px;
+  height: 30px;
+  text-align: center;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+textarea {
+  width: 500px;
+  height: 30px;
+  text-align: center;
+}
+
+.bgImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  animation: fadeIn 0.5s linear;
+}

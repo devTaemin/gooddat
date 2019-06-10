@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Good Dat</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="index.css" />
+
+    <script language="Javascript">
+      function download(filename, text) {
+        var pom = document.createElement("a");
+        pom.setAttribute(
+          "href",
+          "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+        );
+        pom.setAttribute("download", filename);
+
+        pom.style.display = "none";
+        document.body.appendChild(pom);
+
+        pom.click();
+
+        document.body.removeChild(pom);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="title">
+      <h1>Good Dat</h1>
+    </div>
+
+    <form onsubmit="download(this['name'].value, this['text'].value)">
+      <div>
+        <input type="text" name="text" placeholder="Write a product URL" />
+      </div>
+      <div>
+        <input type="submit" value="Search" />
+      </div>
+    </form>
+  </body>
+</html>

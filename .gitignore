@@ -1,3 +1,4 @@
 *.hwp
 *.log
 .DS_Store
+*.json
