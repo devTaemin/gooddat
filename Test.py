@@ -20,6 +20,7 @@ from tensorflow.keras import optimizers
 from tensorflow.keras import losses
 from tensorflow.keras import metrics
 
+# 파일 데이터 읽어오기
 def read_data(filename):
     with open(filename, 'r', encoding='UTF8') as f:
         data = [line.split('\t') for line in f.read().splitlines()]
@@ -27,13 +28,16 @@ def read_data(filename):
         data = data[1:]
     return data
 
+# Test set & Training set 문장 형태소 분할하기
 def tokenize(doc):
     # norm은 정규화, stem은 근어로 표시하기를 나타냄
     return ['/'.join(t) for t in okt.pos(doc, norm=True, stem=True)]
 
+# 단어 빈도수 세기
 def term_frequency(doc):
     return [doc.count(word) for word in selected_words]
 
+# 긍정 부정 점수 예측하기
 def predict_pos_neg(review, token_array_pro, token_array_con):
     temp_pro = []
     temp_con = []
@@ -41,6 +45,7 @@ def predict_pos_neg(review, token_array_pro, token_array_con):
     tf = term_frequency(token)
     data = np.expand_dims(np.asarray(tf).astype('float32'), axis=0)
     score = float(model.predict(data))
+    #긍정적일 경우
     if(score > 0.5):
         temp = okt.pos(review)
         temp_pro.append(temp)
@@ -48,7 +53,7 @@ def predict_pos_neg(review, token_array_pro, token_array_con):
             for t in d:
                 if (t[1] == 'Noun' or t[1] == 'Adjective' or t[1] == 'Verb'):
                     token_array_pro.append(t)
-        #print("[{}]는 {:.2f}% 확률로 긍정 리뷰\n".format(review, score * 100))
+    #부정적일 경우
     else:
         temp = okt.pos(review)
         temp_con.append(temp)
@@ -56,13 +61,13 @@ def predict_pos_neg(review, token_array_pro, token_array_con):
             for t in d:
                 if (t[1] == 'Noun' or t[1] == 'Adjective' or t[1] == 'Verb'):
                     token_array_con.append(t)
-        #print("[{}]는 {:.2f}% 확률로 부정 리뷰\n".format(review, (1 - score) * 100))
-
-train_data = read_data('ratings_train.txt')
-test_data = read_data('ratings_test.txt')
+       
+train_data = read_data('nratings_train.txt')
+test_data = read_data('nratings_test.txt')
 
 okt = Okt()
 
+# JSON 파일 만들기
 if os.path.isfile('train_docs.json'):
     with open('train_docs.json', encoding="utf-8") as f:
         train_docs = json.load(f)
@@ -77,7 +82,8 @@ else:
     with open('test_docs.json', 'w', encoding="utf-8") as make_file:
         json.dump(test_docs, make_file, ensure_ascii=False, indent="\t")
 
-# 예쁘게(?) 출력하기 위해서 pprint 라이브러리 사용
+# 예쁘게 출력하기 위해서 pprint 라이브러리 사용
+# 모델링
 tokens = [t for d in train_docs for t in d[0]]
 
 text = nltk.Text(tokens, name='NMSC')
@@ -91,7 +97,6 @@ test_y = [c for _, c in test_docs]
 
 x_train = np.asarray(train_x).astype('float32')
 x_test = np.asarray(test_x).astype('float32')
-
 y_train = np.asarray(train_y).astype('float32')
 y_test = np.asarray(test_y).astype('float32')
 
@@ -107,63 +112,64 @@ model.compile(optimizer=optimizers.RMSprop(lr=0.001),
 model.fit(x_train, y_train, epochs=10, batch_size=512)
 results = model.evaluate(x_test, y_test)
 
+# 예측하려고 하는 데이터 입력
 token_array_pro = []
 token_array_con = []
 
 current_dir =  os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.abspath(current_dir + "/../")
 current_dir = os.path.abspath(parent_dir + "gooddat/txt_files/")
-with open(current_dir + 'ratings_test.txt', 'r', encoding='UTF8') as f:
-#with open(current_dir + 'Flyday_comment_list.txt', 'r', encoding='UTF8') as f:
+with open(current_dir + 'FLYDAY_testdata_6.txt', 'r', encoding='UTF8') as f:
     for line in f:
         predict_pos_neg(line, token_array_pro, token_array_con)
         
+# 긍정적인 댓글에 대한 결과        
 text_pro = nltk.Text(token_array_pro, name = 'NMSC')
 print (len(text_pro.tokens))
 print(len(set(text_pro.tokens)))
 pprint(text_pro.vocab().most_common(10))
 
+# 부정적인 댓글에 대한 결과
 text_con = nltk.Text(token_array_con, name = 'NMSC')
 print (len(text_con.tokens))
 print(len(set(text_con.tokens)))
-
 pprint(text_con.vocab().most_common(10))
 
-#그래프 그리기
+# 그래프를 그리기 위한 초기화
 font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
 rc('font', family=font_name)
 y_pro = []
 x_pro = []
 y_con = []
 x_con = []
-
-
-for i in range(0, 10):
-    y_pro.append(text_pro.vocab().most_common(10)[i][0][0])
-    x_pro.append(text_pro.vocab().most_common(10)[i][1])
     
-fig = plt.figure(figsize=(12, 8))
-ax = fig.add_subplot(111)
-ypos = np.arange(10)
-rects = plt.barh(ypos, x_pro, align='center', height=0.5)
-plt.yticks(ypos, y_pro)
-plt.xlabel('긍정적인 결과')
-plt.show()
+# 긍정적인 댓글에 대한 그래프
+if(len(text_pro) == 0 and len(text_pro) == 0):
+    print('긍정적인 댓글이 없습니다')
+else:
+    for i in range(0, 10):
+        y_pro.append(text_pro.vocab().most_common(10)[i][0][0])
+        x_pro.append(text_pro.vocab().most_common(10)[i][1])
+    fig = plt.figure(figsize=(12, 8))
+    ax = fig.add_subplot(111)
+    ypos = np.arange(10)
+    rects = plt.barh(ypos, x_pro, align='center', height=0.5)
+    plt.yticks(ypos, y_pro)
+    plt.xlabel('긍정적인 결과')
+    plt.show()
 
-for i in range(0, 10):
-    y_con.append(text_con.vocab().most_common(10)[i][0][0])
-    x_con.append(text_con.vocab().most_common(10)[i][1])
-    
-fig = plt.figure(figsize=(12, 8))
-ax = fig.add_subplot(111)
-ypos = np.arange(10)
-rects = plt.barh(ypos, x_con, align='center', height=0.5)
-plt.yticks(ypos, y_con)
-plt.xlabel('부정적인 결과')
-plt.show()
+# 부정적인 댓글에 대한 그래프
+if(len(text_con) == 0 and len(text_con) == 0):
+    print('부정적인 댓글이 없습니다')
+else:
+    for i in range(0, 10):
+        y_con.append(text_con.vocab().most_common(10)[i][0][0])
+        x_con.append(text_con.vocab().most_common(10)[i][1])
+    fig = plt.figure(figsize=(12, 8))
+    ax = fig.add_subplot(111)
+    ypos = np.arange(10)
+    rects = plt.barh(ypos, x_con, align='center', height=0.5)
+    plt.yticks(ypos, y_con)
+    plt.xlabel('부정적인 결과')
+    plt.show()
 
-#predict_pos_neg("올해 최고의 영화! 세 번 넘게 봐도 질리지가 않네요.")
-#predict_pos_neg("배경 음악이 영화의 분위기랑 너무 안 맞았습니다. 몰입에 방해가 됩니다.")
-#predict_pos_neg("주연 배우가 신인인데 연기를 진짜 잘 하네요. 몰입감 ㅎㄷㄷ")
-#predict_pos_neg("믿고 보는 감독이지만 이번에는 아니네요")
-#predict_pos_neg("주연배우 때문에 봤어요")
